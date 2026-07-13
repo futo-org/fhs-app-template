@@ -1,0 +1,29 @@
+# Production Docker Compose
+# Usage: docker compose up -d --build
+#
+# There is no separate web container in production: the server image builds
+# the static web app (adapter-static) and the Go server serves it on "/".
+
+name: mini-app
+
+services:
+  server:
+    container_name: mini_app_server
+    image: mini-app:latest
+    build:
+      context: ../server
+      # Named context for the web sources so the server image can bundle
+      # the static web build
+      additional_contexts:
+        web: ../web
+      target: prod
+    environment:
+      APP_ENV: production
+    volumes:
+      # Create ./appdata before first up (the mise docker:up/update tasks do
+      # this) — if Docker creates it, it ends up root-owned and unwritable
+      # by the container's app user (uid 1000)
+      - ./appdata:/app/appdata
+    ports:
+      - 3001:3001
+    restart: always

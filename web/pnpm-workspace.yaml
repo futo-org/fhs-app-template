@@ -1,0 +1,4 @@
+# Marks this app as its own pnpm root so installs don't resolve up into the
+# fhs-core repo workspace
+onlyBuiltDependencies:
+  - esbuild

@@ -1,0 +1,43 @@
+[tools]
+node = "25.9.0"
+go = "1.26.4"
+pnpm = "10.33.0"
+air = "1.65.3"
+swag = "1.16.6"
+yq = "4.53.3"
+"go:github.com/pressly/goose/v3/cmd/goose" = "latest"
+sqlc = "1.31.1"
+atlas = "1.2.0"
+
+[tasks."dev"]
+dir = "docker"
+run = "docker compose -f docker-compose.dev.yml up --build"
+
+[tasks."dev-down"]
+dir = "docker"
+run = "docker compose -f docker-compose.dev.yml down"
+
+[tasks."prod"]
+dir = "docker"
+run = ["mkdir -p appdata", "docker compose up"]
+
+[tasks."prod-down"]
+dir = "docker"
+run = "docker compose down"
+
+[tasks."dev-update"]
+dir = "docker"
+run = ["mkdir -p appdata", "docker compose up -d --build"]
+
+[tasks.create-migration]
+dir = "server"
+usage = 'arg "name"'
+run = "goose create $usage_name sql"
+
+[tasks."db:diff"]
+dir = "server"
+run = "atlas migrate diff --env bun"
+
+[tasks."db:lint"]
+dir = "server"
+run = "atlas migrate lint --env bun --latest 1"

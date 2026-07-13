@@ -1,0 +1,36 @@
+name: mini-app-dev
+
+services:
+  server:
+    container_name: mini_app_server_dev
+    image: mini-app:dev
+    build:
+      context: ../server
+      target: dev
+    environment:
+      APP_ENV: development
+    volumes:
+      - ../server:/app
+    ports:
+      - 3001:3001
+
+  web:
+    container_name: mini_app_web_dev
+    image: mini-app-web:dev
+    build:
+      context: ../web
+      target: dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ../web:/app
+      # Named volumes mask the host's node_modules and .svelte-kit so the
+      # container installs and builds for its own platform
+      - web-node_modules:/app/node_modules
+      - web-sveltekit:/app/.svelte-kit
+    ports:
+      - 3000:3000
+
+volumes:
+  web-node_modules:
+  web-sveltekit:
