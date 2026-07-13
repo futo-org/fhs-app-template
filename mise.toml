@@ -4,6 +4,7 @@ pnpm = "10.33.0"
 go = "1.26.4"
 air = "1.65.3"
 "go:github.com/pressly/goose/v3/cmd/goose" = "3.27.2"
+"go:github.com/onsi/ginkgo/v2/ginkgo" = "2.32.0"
 atlas = "1.2.0"
 
 [tasks."dev"]
@@ -25,6 +26,10 @@ run = "docker compose down"
 [tasks."dev-update"]
 dir = "docker"
 run = ["mkdir -p appdata", "docker compose up -d --build"]
+
+[tasks."test"]
+dir = "server"
+run = "ginkgo -p ./test/..."
 
 [tasks.create-migration]
 dir = "server"
