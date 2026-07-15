@@ -1,0 +1,108 @@
+# Release: manually triggered from the Actions tab. Pick a major/minor/patch
+# bump; the workflow bumps server/VERSION, pushes the commit to master, builds
+# the production image (server + bundled static web build) from it, pushes the
+# image to GHCR, and creates a GitHub Release with generated notes.
+#
+# Note: the bump commit is pushed with GITHUB_TOKEN, so it does not trigger
+# other workflows (e.g. test.yml) — run releases from a green master.
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Choose version bump type"
+        type: choice
+        required: true
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  packages: write
+
+# Never run two releases at once — they would race on the version bump push
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Bump version
+        id: bump
+        run: |
+          version="$(./scripts/bump_version.sh "${{ inputs.bump }}")"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "Releasing v${version} (${{ inputs.bump }} bump)"
+
+      - name: Push version bump to master
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/VERSION
+          git commit -m "chore: release v${{ steps.bump.outputs.version }}"
+          git push origin HEAD:master
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate image tags and labels
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}},value=v${{ steps.bump.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=v${{ steps.bump.outputs.version }}
+            type=raw,value=latest
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          # The workspace already matches the bump commit just pushed to
+          # master, so building from it builds the released code.
+          # Same wiring as docker/docker-compose.yml: the web sources are a
+          # named context so the server image can bundle the static web build
+          context: server
+          build-contexts: web=web
+          target: prod
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.bump.outputs.version }}" \
+            --target "${{ steps.commit.outputs.sha }}" \
+            --title "v${{ steps.bump.outputs.version }}" \
+            --generate-notes

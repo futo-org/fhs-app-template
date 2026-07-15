@@ -6,3 +6,4 @@ appdata/
 tmp/
 docs/
 *.md
+bin/

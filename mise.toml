@@ -27,6 +27,14 @@ run = "docker compose down"
 dir = "docker"
 run = ["mkdir -p appdata", "docker compose up -d --build"]
 
+[tasks."build"]
+description = "Build the server binary (same flags as the Dockerfile) and print the embedded version"
+dir = "server"
+run = [
+  "CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o bin/mini-app .",
+  "echo \"built bin/mini-app, version: $(./bin/mini-app --version)\"",
+]
+
 [tasks."test"]
 dir = "server"
 run = "ginkgo -p ./test/..."

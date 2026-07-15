@@ -10,6 +10,7 @@ tmp_dir = "tmp"
   exclude_dir = ["tmp", "vendor", "doc"]
   exclude_regex = ["_test\\.go$"]
   include_ext = ["go", "toml", "json"]
+  include_file = ["VERSION"]
   kill_delay = "500ms"
   send_interrupt = true
   stop_on_error = true
