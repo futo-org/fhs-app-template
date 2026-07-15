@@ -1,0 +1,22 @@
+# Production Docker Compose
+# Usage: docker compose up -d --build
+#
+# There is no separate web container in production: the server image builds
+# the static web app (adapter-static) and the Go server serves it on "/".
+
+name: mini-app-prod
+
+services:
+  server:
+    container_name: mini_app_server
+    image: mini-app:latest
+    build:
+      context: ../server
+      additional_contexts:
+        web: ../web
+      target: prod
+    volumes:
+      - ./appdata:/app/appdata
+    ports:
+      - 3001:3001
+    restart: always
