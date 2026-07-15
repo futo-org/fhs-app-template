@@ -1,7 +1,8 @@
 # Release: manually triggered from the Actions tab. Pick a major/minor/patch
 # bump; the workflow bumps server/VERSION, pushes the commit to master, builds
 # the production image (server + bundled static web build) from it, pushes the
-# image to GHCR, and creates a GitHub Release with generated notes.
+# image to GHCR, and creates a GitHub Release with generated notes and the
+# deploy docker-compose.yml (pinned to the released image tag) as an artifact.
 #
 # Note: the bump commit is pushed with GITHUB_TOKEN, so it does not trigger
 # other workflows (e.g. test.yml) — run releases from a green master.
@@ -98,11 +99,29 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Prepare docker-compose artifact
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          # Pin the deploy compose to the image tag just pushed, so the
+          # artifact deploys exactly this release rather than :latest
+          sed "s|image: ${IMAGE}:latest|image: ${IMAGE}:${VERSION}|" \
+            docker/docker-compose.yml > /tmp/docker-compose.yml
+          grep -q "image: ${IMAGE}:${VERSION}" /tmp/docker-compose.yml
+
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.bump.outputs.version }}
         run: |
-          gh release create "v${{ steps.bump.outputs.version }}" \
+          cat > /tmp/notes.md <<EOF
+          ## Deploy
+
+          Download the attached \`docker-compose.yml\` (pinned to \`${IMAGE}:${VERSION}\`) and run \`docker compose up -d\`.
+          EOF
+          gh release create "v${VERSION}" \
             --target "${{ steps.commit.outputs.sha }}" \
-            --title "v${{ steps.bump.outputs.version }}" \
-            --generate-notes
+            --title "v${VERSION}" \
+            --generate-notes \
+            --notes "$(cat /tmp/notes.md)" \
+            /tmp/docker-compose.yml

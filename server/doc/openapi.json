@@ -915,7 +915,7 @@
 	"servers": [
 		{
 			"description": "local server",
-			"url": "http://127.0.0.1:3903"
+			"url": "http://0.0.0.0:3001"
 		}
 	],
 	"tags": [

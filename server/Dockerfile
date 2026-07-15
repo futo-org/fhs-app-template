@@ -28,6 +28,14 @@ FROM base AS dev
 # Version matches the air pin in apps/templates/mise.toml
 RUN go install github.com/air-verse/air@v1.65.3
 
+# uid/gid 1000 matches the default first Linux user, so files air writes into
+# the bind-mounted source dir (./tmp) stay owned by the host user. /go is
+# chowned so the app user can use the module cache and install new modules
+RUN addgroup -S -g 1000 app && adduser -S -u 1000 -G app app && \
+    chown -R app:app /go
+
+USER app
+
 ENV APP_ENV=development
 
 EXPOSE 3001
@@ -77,13 +85,8 @@ WORKDIR /app
 COPY --from=build /out/mini-app ./mini-app
 COPY --from=web-build /web/build ./web
 
-# Config resolves the database to appdata/database.db relative to the workdir.
-# uid/gid 1000 matches the default first Linux user so the bind-mounted
-# appdata dir on the host stays writable by both sides
-RUN addgroup -S -g 1000 app && adduser -S -u 1000 -G app app && \
-    mkdir -p /app/appdata && chown -R app:app /app
-
-USER app
+# Config resolves the database to appdata/database.db relative to the workdir
+RUN mkdir -p /app/appdata
 
 ENV APP_ENV=production \
     SERVER_ADDR=0.0.0.0:3001

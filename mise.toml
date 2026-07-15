@@ -17,23 +17,23 @@ run = "docker compose -f docker-compose.dev.yml down"
 
 [tasks."prod"]
 dir = "docker"
-run = ["mkdir -p appdata", "docker compose up"]
+run = "docker compose -f docker-compose.prod.yml up --build"
 
 [tasks."prod-build"]
 description = "Build the production docker image and print its embedded version"
 dir = "docker"
 run = [
-  "docker compose build",
+  "docker compose -f docker-compose.prod.yml build",
   "echo \"built mini-app:latest, version: $(docker run --rm mini-app:latest --version)\"",
 ]
 
 [tasks."prod-down"]
 dir = "docker"
-run = "docker compose down"
+run = "docker compose -f docker-compose.prod.yml down"
 
 [tasks."dev-update"]
 dir = "docker"
-run = ["mkdir -p appdata", "docker compose up -d --build"]
+run = "docker compose -f docker-compose.dev.yml up -d --build"
 
 [tasks."build"]
 description = "Build the server binary (same flags as the Dockerfile) and print the embedded version"
