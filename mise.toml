@@ -19,6 +19,14 @@ run = "docker compose -f docker-compose.dev.yml down"
 dir = "docker"
 run = ["mkdir -p appdata", "docker compose up"]
 
+[tasks."prod-build"]
+description = "Build the production docker image and print its embedded version"
+dir = "docker"
+run = [
+  "docker compose build",
+  "echo \"built mini-app:latest, version: $(docker run --rm mini-app:latest --version)\"",
+]
+
 [tasks."prod-down"]
 dir = "docker"
 run = "docker compose down"
