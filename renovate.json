@@ -1,0 +1,52 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":configMigration",
+    "abandonments:recommended"
+  ],
+  "enabledManagers": ["mise", "custom.regex"],
+  "recreateWhen": "never",
+  "minimumReleaseAge": "5 days",
+  "schedule": "before 9am on tuesday",
+  "labels": ["dependencies", "renovate", "changelog:skip"],
+  "packageRules": [
+    {
+      "description": "Runtimes and package managers get a PR each — they ripple into the CI image, server/go.mod and web/package.json",
+      "matchManagers": ["mise"],
+      "matchDepNames": ["node", "pnpm", "go"],
+      "addLabels": ["toolchain"]
+    },
+    {
+      "description": "The rest of [tools] is CLIs driven by mise tasks (air, atlas, goose, ginkgo) — ship them as one PR",
+      "matchManagers": ["mise", "custom.regex"],
+      "matchDepNames": ["!node", "!pnpm", "!go"],
+      "groupName": "mise dev tooling"
+    },
+    {
+      "description": "go: backend tools are handled by the custom manager below — the built-in mise manager passes the command subdirectory to the Go datasource, which returns no result",
+      "matchManagers": ["mise"],
+      "matchDatasources": ["go"],
+      "enabled": false
+    },
+    {
+      "description": "A major bump moves the /vN segment, which lives in the tool name rather than the version, so mise.toml needs a hand edit Renovate cannot make",
+      "matchManagers": ["custom.regex"],
+      "matchUpdateTypes": ["major"],
+      "groupName": null,
+      "dependencyDashboardApproval": true
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "mise go: backend tools — re-extract with the command subdirectory trimmed to the importable module path",
+      "managerFilePatterns": ["/(^|/)mise\\.toml$/"],
+      "matchStrings": [
+        "\"go:(?<depName>[^\"/]+/[^\"/]+/[^\"/]+(?:/v\\d+)?)(?:/[^\"]*)?\"\\s*=\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "go",
+      "extractVersionTemplate": "^v(?<version>.*)$"
+    }
+  ]
+}
