@@ -33,9 +33,8 @@ func NewServer(cfg *config.Config) *fuego.Server {
 		fuego.WithAddr(cfg.ServerAddr),
 		fuego.WithEngineOptions(
 			fuego.WithOpenAPIConfig(fuego.OpenAPIConfig{
-				JSONFilePath:     "doc/openapi.json",
 				PrettyFormatJSON: true,
-				DisableLocalSave: !isDev,
+				DisableLocalSave: true,
 				DisableMessages:  !isDev,
 				DisableSwaggerUI: !isDev,
 				Info: &openapi3.Info{
@@ -49,7 +48,7 @@ func NewServer(cfg *config.Config) *fuego.Server {
 
 func RunServer(lc fx.Lifecycle, s *fuego.Server) {
 	lc.Append(fx.Hook{
-		OnStart: func(ctx context.Context) error {
+		OnStart: func(_ context.Context) error {
 			go func() {
 				if err := s.Run(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 					panic(err)

@@ -1,6 +1,6 @@
 data "external_schema" "bun" {
   program = [
-    "go", "run", "-mod=mod",
+    "go", "run", "-mod=readonly",
     "ariga.io/atlas-provider-bun",
     "load",
     "--path", "./internal/database/entity",

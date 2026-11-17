@@ -912,12 +912,6 @@
 			}
 		}
 	},
-	"servers": [
-		{
-			"description": "local server",
-			"url": "http://0.0.0.0:3001"
-		}
-	],
 	"tags": [
 		{
 			"name": "albums"

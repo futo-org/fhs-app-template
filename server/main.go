@@ -2,7 +2,9 @@ package main
 
 import (
 	_ "embed"
+	"flag"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -33,15 +35,26 @@ func main() {
 		return
 	}
 
-	fmt.Printf("version is %s\n", version.Version)
+	generateOpenAPI := flag.Bool("open-api", false, "print the OpenAPI spec and exit")
+	flag.Parse()
 
-	fx.New(
-		config.Module,
+	modules := fx.Options(
 		database.Module,
-		migrations.Module,
 		repository.Module,
 		service.Module,
 		controller.Module,
 		server.Module,
-	).Run()
+	)
+
+	if *generateOpenAPI {
+		if err := exportOpenAPI(modules); err != nil {
+			log.Fatalf("export OpenAPI: %v", err)
+		}
+
+		return
+	}
+
+	fmt.Printf("version is %s\n", version.Version)
+
+	fx.New(config.Module, migrations.Module, modules).Run()
 }

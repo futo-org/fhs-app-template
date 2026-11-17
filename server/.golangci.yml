@@ -1,0 +1,19 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: standard
+  enable:
+    - intrange
+    - modernize
+    - revive
+  settings:
+    revive:
+      rules:
+        - name: unused-parameter
+
+formatters:
+  enable:
+    - gofmt
