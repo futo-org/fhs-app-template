@@ -25,11 +25,10 @@ edit a struct and let Atlas compute the migration.
 
 ## Prerequisites
 
-The Atlas CLI is provided by mise (`atlas = "1.2.0"` in `../mise.toml`). Confirm it
-resolves:
+The root `mise.toml` pins the Atlas and goose CLIs. Confirm Atlas resolves:
 
 ```bash
-mise run --help >/dev/null && atlas version
+mise exec -- atlas version
 ```
 
 `goose` is a Go library here (applied automatically at startup); the goose CLI is
@@ -102,17 +101,15 @@ the `Down` block.
 
 ## CI drift check
 
-CI verifies that the committed migrations are not behind the entities — i.e. that
-nobody changed a struct without running `db:diff`:
+CI runs the migration comparison against a temporary copy:
 
 ```bash
-mise run db:diff ci_drift_check
-git diff --exit-code internal/database/migrations   # non-zero → entities are ahead
-mise run db:lint
+mise run db:check
 ```
 
-A non-zero `git diff` means an entity changed but no migration was generated for
-it. Run `mise run db:diff <name>` locally, commit the result, and push.
+If the entities have drifted, run `mise run db:diff <name>` and commit the SQL and
+`atlas.sum`. If you intentionally edited migration SQL, run `mise run db:hash` and
+commit the refreshed checksum.
 
 ## Troubleshooting
 

@@ -33,9 +33,8 @@ func NewServer(cfg *config.Config) *fuego.Server {
 		fuego.WithAddr(cfg.ServerAddr),
 		fuego.WithEngineOptions(
 			fuego.WithOpenAPIConfig(fuego.OpenAPIConfig{
-				JSONFilePath:     "doc/openapi.json",
 				PrettyFormatJSON: true,
-				DisableLocalSave: !isDev,
+				DisableLocalSave: true,
 				DisableMessages:  !isDev,
 				DisableSwaggerUI: !isDev,
 				Info: &openapi3.Info{

@@ -5,7 +5,7 @@
     ":configMigration",
     "abandonments:recommended"
   ],
-  "enabledManagers": ["mise", "custom.regex"],
+  "enabledManagers": ["mise", "custom.regex", "github-actions"],
   "recreateWhen": "never",
   "minimumReleaseAge": "5 days",
   "labels": ["dependencies", "renovate", "changelog:skip"],
@@ -17,7 +17,7 @@
       "addLabels": ["toolchain"]
     },
     {
-      "description": "The rest of [tools] is CLIs driven by mise tasks (air, atlas, goose, ginkgo) — ship them as one PR",
+      "description": "The rest of [tools] is CLIs driven by mise tasks (air, atlas, goose) — ship them as one PR",
       "matchManagers": ["mise", "custom.regex"],
       "matchDepNames": ["!node", "!pnpm", "!go"],
       "groupName": "mise dev tooling"
