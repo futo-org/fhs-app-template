@@ -33,7 +33,7 @@ func SetupDatabase(lc fx.Lifecycle, cfg *config.Config) (*sql.DB, error) {
 		OnStart: func(ctx context.Context) error {
 			return db.PingContext(ctx)
 		},
-		OnStop: func(ctx context.Context) error {
+		OnStop: func(_ context.Context) error {
 			return db.Close()
 		},
 	})

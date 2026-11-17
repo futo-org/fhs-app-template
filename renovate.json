@@ -17,7 +17,7 @@
       "addLabels": ["toolchain"]
     },
     {
-      "description": "The rest of [tools] is CLIs driven by mise tasks (air, atlas, goose) — ship them as one PR",
+      "description": "Group the remaining development CLIs used by mise tasks",
       "matchManagers": ["mise", "custom.regex"],
       "matchDepNames": ["!node", "!pnpm", "!go"],
       "groupName": "mise dev tooling"

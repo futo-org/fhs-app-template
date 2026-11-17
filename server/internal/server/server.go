@@ -48,7 +48,7 @@ func NewServer(cfg *config.Config) *fuego.Server {
 
 func RunServer(lc fx.Lifecycle, s *fuego.Server) {
 	lc.Append(fx.Hook{
-		OnStart: func(ctx context.Context) error {
+		OnStart: func(_ context.Context) error {
 			go func() {
 				if err := s.Run(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 					panic(err)

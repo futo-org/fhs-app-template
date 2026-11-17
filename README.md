@@ -16,7 +16,7 @@ The web app runs at [localhost:3000](http://localhost:3000) and the API docs at 
 
 ## Check
 
-Run `mise run check` from the repository root. CI runs the same task. It checks Go formatting and vet, runs the Go tests with the race detector, builds the Go binary and web app, checks Svelte types, and compares the OpenAPI spec and migrations to their Go sources. Running the Go tests with the race detector requires a C compiler.
+Run `mise run check` from the repository root. CI runs the same task. It runs golangci-lint and the Go tests with the race detector, builds the Go binary and web app, checks Svelte types, and compares the OpenAPI spec and migrations to their Go sources. Running the Go tests with the race detector requires a C compiler. For Go lint alone, run `mise run server:lint`.
 
 | Changed | Command | Commit with the change |
 | --- | --- | --- |

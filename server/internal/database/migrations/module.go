@@ -12,9 +12,10 @@ import (
 var migrationsFS embed.FS
 
 func runMigration(db *sql.DB) error {
-
 	goose.SetBaseFS(migrationsFS)
-	goose.SetDialect("sqlite3")
+	if err := goose.SetDialect("sqlite3"); err != nil {
+		return err
+	}
 
 	return goose.Up(db, ".")
 }
