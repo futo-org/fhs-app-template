@@ -83,7 +83,7 @@ jobs:
             type=raw,value=latest
 
       - name: Build and push image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           # The workspace already matches the bump commit just pushed to
           # master, so building from it builds the released code.
